@@ -43,8 +43,8 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #1F1714;
-    --foreground: #FBF7F2;
+    --foreground: #1F1714;
+    --background: #FBF7F2;
     --accent: #B5532F;
 
     --error-light: #faebeb;
