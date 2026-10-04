@@ -1,0 +1,73 @@
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum QueueStatus {
+  WAITING
+  IN_TURN
+  DONE
+  EXTENDED
+  CANCELED
+
+  @@map("queue_status")
+}
+
+enum UserRole {
+  ADMIN
+
+  @@map("user_role")
+}
+
+model Queue {
+  id             String      @id @default(cuid())
+  custName       String      @map("cust_name")
+  phoneNumber    String?     @map("phone_number")
+  date           DateTime    @db.Date
+  queueNumber    Int         @map("queue_number")
+  queueStatus    QueueStatus @default(WAITING) @map("queue_status")
+  estimatedEndAt DateTime?   @map("estimated_end_at")
+
+  idBooth        String      @map("id_booth")
+  booth          Booth       @relation(fields: [idBooth], references: [id], onDelete: Restrict)
+
+  createdAt      DateTime    @default(now()) @map("created_at")
+  updatedAt      DateTime    @updatedAt @map("updated_at")
+
+  @@unique([idBooth, date, queueNumber])
+  @@index([idBooth, date, queueStatus])
+  @@index([date, queueStatus])
+  @@map("queue")
+}
+
+model Booth {
+  id          String   @id @default(cuid())
+  name        String
+  branch      String
+  qrFilePath  String?  @map("qr_file_path")
+
+  queues      Queue[]
+
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@map("booth")
+}
+
+model User {
+  id          String   @id @default(cuid())
+  name        String
+  email       String   @unique
+  password    String
+  role        UserRole @default(ADMIN)
+
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@map("users")
+}
