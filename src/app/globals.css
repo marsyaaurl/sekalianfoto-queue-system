@@ -8,14 +8,72 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-accent: var(--accent);
+
+  --color-error-light: var(--error-light);
+  --color-error-light-hover: var(--error-light-hover);
+  --color-error-light-active: var(--error-light-active);
+  --color-error: var(--error);
+  --color-error-normal-hover: var(--error-normal-hover);
+  --color-error-normal-active: var(--error-normal-active);
+  --color-error-dark: var(--error-dark);
+  --color-error-dark-hover: var(--error-dark-hover);
+
+  --color-success-light: var(--success-light);
+  --color-success-light-hover: var(--success-light-hover);
+  --color-success-light-active: var(--success-light-active);
+  --color-success: var(--success);
+  --color-success-normal-hover: var(--success-normal-hover);
+  --color-success-normal-active: var(--success-normal-active);
+  --color-success-dark: var(--success-dark);
+  --color-success-dark-hover: var(--success-dark-hover);
+
+  --color-warning-light: var(--warning-light);
+  --color-warning-light-hover: var(--warning-light-hover);
+  --color-warning-light-active: var(--warning-light-active);
+  --color-warning: var(--warning);
+  --color-warning-normal-hover: var(--warning-normal-hover);
+  --color-warning-normal-active: var(--warning-normal-active);
+  --color-warning-dark: var(--warning-dark);
+  --color-warning-dark-hover: var(--warning-dark-hover);
+
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: #1F1714;
+    --foreground: #FBF7F2;
+    --accent: #B5532F;
+
+    --error-light: #faebeb;
+    --error-light-hover: #f8e1e1;
+    --error-light-active: #f0c1c1;
+    --error: #ce3636;
+    --error-normal-hover: #b93131;
+    --error-normal-active: #a52b2b;
+    --error-dark: #9b2929;
+    --error-dark-hover: #7c2020;
+
+    --success-light: #e9f8f1;
+    --success-light-hover: #def4eb;
+    --success-light-active: #bae8d5;
+    --success: #20b577;
+    --success-normal-hover: #1da36b;
+    --success-normal-active: #1a915f;
+    --success-dark: #188859;
+    --success-dark-hover: #136d47;
+
+    --warning-light: #fffeed;
+    --warning-light-hover: #fffee4;
+    --warning-light-active: #fffcc7;
+    --warning: #fff649;
+    --warning-normal-hover: #e6dd42;
+    --warning-normal-active: #ccc53a;
+    --warning-dark: #bfb937;
+    --warning-dark-hover: #99942c;
+
   }
 }
 
