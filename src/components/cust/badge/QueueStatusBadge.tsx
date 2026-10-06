@@ -16,7 +16,7 @@ const STATUS_STYLES: Record<QueueStatus, { label: string; className: string }> =
   },
   extended: {
     label: "Diperpanjang",
-    className: "bg-warning-light text-warning-dark border border-warning-dark",
+    className: "bg-warning-light text-foreground border border-warning-dark",
   },
   done: {
     label: "Selesai",
