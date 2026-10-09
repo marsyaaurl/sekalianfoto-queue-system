@@ -33,7 +33,8 @@ const EXTEND_SESSION_MINUTES = 5
 const EMPTY_PHONE_PLACEHOLDER = "-"
 const COLUMN_HEADERS = ["No.", "Nama", "No. telepon", "Status", "Aksi"] as const
 
-const CANCEL_BUTTON_CLASS = "text-destructive border-destructive/30"
+const CANCEL_BUTTON_CLASS =
+  "text-destructive border-destructive/50 hover:bg-destructive/10"
 
 function StatusBadge({ status }: { status: QueueEntryStatus }) {
   if (status === "IN_BOOTH") {
@@ -128,7 +129,7 @@ export function QueueTable({
               key={entry.id}
               className={cn(
                 "h-14",
-                entry.status === "IN_BOOTH" && "bg-destructive/5"
+                entry.status === "IN_BOOTH" && "bg-accent/10"
               )}
             >
               <TableCell className="px-4 font-bold">

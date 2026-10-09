@@ -32,8 +32,8 @@ function SidebarNavLink({ item, isActive }: SidebarNavLinkProps) {
       className={cn(
         "rounded-lg px-4 py-3 text-lg font-medium transition-colors",
         isActive
-          ? "bg-background/20 text-background"
-          : "text-background/70 hover:text-background"
+          ? "bg-sidebar-accent text-sidebar-foreground"
+          : "text-sidebar-foreground/70 hover:text-sidebar-foreground"
       )}
     >
       {item.label}
@@ -45,7 +45,7 @@ export function Sidebar() {
   const pathname = usePathname()
 
   return (
-    <aside className="flex min-h-screen w-64 shrink-0 flex-col gap-8 bg-foreground p-4 text-background">
+    <aside className="flex min-h-screen w-64 shrink-0 flex-col gap-8 bg-sidebar p-4 text-sidebar-foreground">
       <Image
         src="/logo.png"
         alt="Sekalian foto"
