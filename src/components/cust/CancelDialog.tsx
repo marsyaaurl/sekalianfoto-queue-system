@@ -1,60 +1,72 @@
-"use client";
+"use client"
 
-interface CancelDialogProps {
-  open: boolean;
-  queueNumber: string;
-  onConfirm: () => void;
-  onCancel: () => void;
-  isLoading?: boolean;
+import { Button } from "@/components/ui/button"
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
+
+export interface CancelDialogProps {
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  queueNumber: string
+  onConfirm: () => void
+  isLoading?: boolean
 }
 
 export default function CancelDialog({
   open,
+  onOpenChange,
   queueNumber,
   onConfirm,
-  onCancel,
   isLoading = false,
 }: CancelDialogProps) {
-  if (!open) return null;
+  // Keep the dialog open while the cancel request is running.
+  const handleOpenChange = (nextOpen: boolean) => {
+    if (!isLoading) onOpenChange(nextOpen)
+  }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end bg-black/40 p-4">
-      <div
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="cancel-dialog-title"
-        className="mx-auto w-full max-w-md rounded-2xl bg-white p-6"
+    <Dialog open={open} onOpenChange={handleOpenChange}>
+      <DialogContent
+        showCloseButton={false}
+        className="top-auto bottom-4 translate-y-0"
       >
-        <h2
-          id="cancel-dialog-title"
-          className="mb-3 text-2xl font-bold text-foreground"
-        >
-          Batalkan antrean?
-        </h2>
-        <p className="mb-6 text-foreground/70">
-          Nomor {queueNumber} akan dihapus dan orang di belakangmu maju satu
-          posisi. Kamu perlu daftar ulang kalau ingin antre lagi.
-        </p>
-
-        <div className="flex flex-col gap-3">
-          <button
-            type="button"
-            onClick={onConfirm}
-            disabled={isLoading}
-            className="h-12 w-full rounded-lg bg-error font-bold text-white disabled:opacity-50"
-          >
-            {isLoading ? "Membatalkan..." : "Ya, batalkan"}
-          </button>
-          <button
-            type="button"
-            onClick={onCancel}
-            disabled={isLoading}
-            className="h-12 w-full rounded-lg border border-foreground/30 bg-white font-bold text-foreground disabled:opacity-50"
+        <DialogHeader>
+          <DialogTitle className="text-2xl font-bold">
+            Batalkan antrean?
+          </DialogTitle>
+          <DialogDescription className="text-base">
+            Nomor {queueNumber} akan dihapus dan orang di belakangmu maju satu
+            posisi. Kamu perlu daftar ulang kalau ingin antre lagi.
+          </DialogDescription>
+        </DialogHeader>
+        <DialogFooter className="sm:flex-col-reverse">
+          <DialogClose
+            render={
+              <Button
+                variant="outline"
+                className="h-12 w-full text-base font-bold"
+                disabled={isLoading}
+              />
+            }
           >
             Tetap Antre
-          </button>
-        </div>
-      </div>
-    </div>
-  );
+          </DialogClose>
+          <Button
+            className="h-12 w-full bg-error text-base font-bold text-white hover:bg-error-normal-hover"
+            onClick={onConfirm}
+            disabled={isLoading}
+          >
+            {isLoading ? "Membatalkan..." : "Ya, batalkan"}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  )
 }
