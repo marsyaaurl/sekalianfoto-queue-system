@@ -1,3 +1,12 @@
+import { existsSync } from "node:fs";
+
+// Load environment variables for standalone script execution
+if (existsSync(".env.local")) {
+  process.loadEnvFile(".env.local");
+} else if (existsSync(".env")) {
+  process.loadEnvFile(".env");
+}
+
 import { PrismaClient } from "../src/generated/prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { randomBytes, scryptSync } from "node:crypto";
@@ -25,9 +34,9 @@ async function main() {
   });
 
   if (!existingUser) {
-    if (!adminPassword || adminPassword.length < 12) {
+    if (!adminPassword || adminPassword.length < 8) {
       throw new Error(
-        "SEED_ADMIN_PASSWORD must be set to a unique password of at least 12 characters before creating the initial admin.",
+        "Admin password must be at least 8 characters.",
       );
     }
 
