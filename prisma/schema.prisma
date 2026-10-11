@@ -26,6 +26,7 @@ enum UserRole {
 
 model Queue {
   id             String      @id @default(cuid())
+  publicToken    String      @unique @default(cuid()) @map("public_token")
   custName       String      @map("cust_name")
   phoneNumber    String?     @map("phone_number")
   date           DateTime    @db.Date
