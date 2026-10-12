@@ -12,7 +12,7 @@ interface NavItem {
 }
 
 const NAV_ITEMS: readonly NavItem[] = [
-  { label: "Antrean", href: "/admin/antrean" },
+  { label: "Antrean", href: "/admin/queue" },
   { label: "Booth", href: "/admin/booth" },
 ]
 
