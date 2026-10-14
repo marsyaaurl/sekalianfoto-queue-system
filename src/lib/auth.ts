@@ -1,16 +1,19 @@
 import "server-only";
 
-import { createHmac, randomBytes, scryptSync, timingSafeEqual } from "node:crypto";
+import { createHmac, scryptSync, timingSafeEqual } from "node:crypto";
 import { cookies } from "next/headers";
 import { prisma } from "@/lib/prisma";
 
-export function hashPassword(password: string): string {
-  const salt = randomBytes(16).toString("hex");
-  const derivedKey = scryptSync(password, salt, 64).toString("hex");
-  return `${salt}:${derivedKey}`;
+import bcrypt from "bcrypt";
+
+export async function hashPassword(password: string): Promise<string> {
+  return bcrypt.hash(password, 10);
 }
 
-export function verifyPassword(password: string, hash: string): boolean {
+export async function verifyPassword(password: string, hash: string): Promise<boolean> {
+  if (hash.startsWith("$2a$") || hash.startsWith("$2b$") || hash.startsWith("$2y$")) {
+    return bcrypt.compare(password, hash);
+  }
   const [salt, key] = hash.split(":");
   if (!salt || !key) return false;
   const derivedKey = scryptSync(password, salt, 64);
