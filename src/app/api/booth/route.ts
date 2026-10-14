@@ -83,3 +83,49 @@ export async function POST(req: NextRequest) {
         );
     }
 }
+
+export async function GET() {
+    try {
+        const session = await getAdminSession()
+
+        if (!session) {
+            return NextResponse.json(
+                {
+                    error: {
+                        code: "UNAUTHORIZED",
+                        message: "Admin access required."
+                    }
+                },
+                { status: 401 }
+            )
+        }
+
+        const booths = await prisma.booth.findMany({
+            select: {
+                id: true,
+                name: true,
+                branch: true,
+                qrFilePath: true,
+                createdAt: true,
+            },
+            orderBy: {
+                createdAt: "desc"
+            }
+        })
+
+        return NextResponse.json(
+            {
+                message: "Booths data successfully retrieved.",
+                data: booths,
+            },
+            { status: 200 }
+        )
+    } catch (err) {
+        console.error("Unexpected error on getting all booths.")
+
+        return NextResponse.json(
+            { message: "Internal server error." },
+            { status: 500 }
+        )
+    }
+}
