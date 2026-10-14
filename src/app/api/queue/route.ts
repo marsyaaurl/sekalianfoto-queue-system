@@ -132,6 +132,7 @@ export async function POST(req: NextRequest) {
                     date: newQueue.date,
                     estimatedEndAt: newQueue.estimatedEndAt,
                     booth: {
+                        id: booth.id,
                         name: booth.name,
                         branch: booth.branch,
                     }
