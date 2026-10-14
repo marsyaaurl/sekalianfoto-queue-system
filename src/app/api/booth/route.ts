@@ -51,9 +51,9 @@ export async function POST(req: NextRequest) {
             },
         });
 
-        // 4. Generate GoQR URL pointing to: <our-website>/booth/[id_booth]
+        // 4. Generate GoQR URL pointing to the queue form for this booth.
         const origin = req.nextUrl.origin; // e.g. "http://localhost:3000"
-        const targetUrl = `${origin}/booth/${booth.id}`;
+        const targetUrl = `${origin}/queue?idBooth=${encodeURIComponent(booth.id)}`;
         const qrFilePath = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(targetUrl)}`;
 
         // 5. Save the generated QR URL into the booth record
