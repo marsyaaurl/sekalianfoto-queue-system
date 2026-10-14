@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
-
+const MIN_NAME_LENGTH = 3;
 interface QueueFormProps {
   onSubmit: (data: { name: string; phone_number?: string }) => void;
   isLoading?: boolean;
@@ -15,8 +15,15 @@ export default function QueueForm({ onSubmit, isLoading = false }: QueueFormProp
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
 
-    if (name.trim() === "") {
+        const trimmedName = name.trim();
+
+    if (trimmedName === "") {
       setError("Nama wajib diisi.");
+      return;
+    }
+
+    if (trimmedName.length < MIN_NAME_LENGTH) {
+      setError("Nama minimal 3 karakter.");
       return;
     }
 
