@@ -1,9 +1,11 @@
 import type { ReactNode } from "react";
 
+// Shown while the API does not provide a value yet.
+const EMPTY_VALUE = "–";
 interface QueueCardProps {
   queueNumber: string;
-  peopleAhead: number;
-  estimatedMinutes: number;
+  peopleAhead?: number;
+  estimatedMinutes?: number;
   badge?: ReactNode;
 }
 
@@ -13,6 +15,11 @@ export default function QueueCard({
   estimatedMinutes,
   badge,
 }: QueueCardProps) {
+
+    const peopleAheadText =
+    peopleAhead === undefined ? EMPTY_VALUE : `${peopleAhead} orang`;
+  const estimatedText =
+    estimatedMinutes === undefined ? EMPTY_VALUE : `~ ${estimatedMinutes} menit`;
   return (
     <div className="flex flex-col gap-4">
       <div className="flex flex-col items-center rounded-2xl border border-foreground/20 bg-white px-6 py-8 text-center">
@@ -25,14 +32,14 @@ export default function QueueCard({
         <div className="rounded-xl border border-foreground/20 bg-white p-4">
           <p className="text-sm text-foreground/70">Di depanmu</p>
           <p className="mt-1 text-2xl font-bold text-foreground">
-            {peopleAhead} orang
+            {peopleAheadText} 
           </p>
         </div>
 
         <div className="rounded-xl border border-foreground/20 bg-white p-4">
           <p className="text-sm text-foreground/70">Estimasi tunggu</p>
           <p className="mt-1 text-2xl font-bold text-foreground">
-            ~ {estimatedMinutes} menit
+            {estimatedText} 
           </p>
         </div>
       </div>
