@@ -6,11 +6,14 @@ import BranchLocationBadge from "@/components/cust/badge/BranchLocationBadge"
 import QueueStatusBadge, {
   type QueueStatus,
 } from "@/components/cust/badge/QueueStatusBadge"
+import CancelDialog from "@/components/cust/CancelDialog"
 import NotificationBanner from "@/components/cust/NotificationBanner"
 import QueueCard from "@/components/cust/QueueCard"
 import YourTurnView from "@/components/cust/YourTurnView"
+import { Button } from "@/components/ui/button"
 import {
   ApiRequestError,
+  cancelQueue,
   getQueue,
   type QueueDetail,
   type QueueStatusValue,
@@ -21,7 +24,7 @@ import { useTurnNotification } from "@/lib/use-turn-notification"
 const POLL_INTERVAL_MS = 5000
 const QUEUE_NUMBER_DIGITS = 3
 const LOADING_MESSAGE = "Memuat antreanmu..."
-const LOAD_ERROR_MESSAGE = "Terjadi kesalahan. Coba lagi sebentar lagi."
+const GENERIC_ERROR_MESSAGE = "Terjadi kesalahan. Coba lagi sebentar lagi."
 const AUTO_REFRESH_NOTE =
   "Halaman ini diperbarui otomatis. Kembali ke booth saat estimasi tinggal sekitar 5 menit."
 
@@ -43,10 +46,11 @@ function formatQueueNumber(boothCode: string | undefined, queueNumber: number) {
   return `${boothCode ?? ""}${digits}`
 }
 
-// Loads the queue once, then refreshes it on a timer.
+// Loads the queue once, then refreshes it on a timer. Calling refresh() reloads right away.
 function useQueueDetail(publicToken: string) {
   const [queue, setQueue] = useState<QueueDetail | null>(null)
   const [errorMessage, setErrorMessage] = useState("")
+  const [refreshCount, setRefreshCount] = useState(0)
 
   useEffect(() => {
     let isActive = true
@@ -60,7 +64,9 @@ function useQueueDetail(publicToken: string) {
       } catch (error) {
         if (!isActive) return
         setErrorMessage(
-          error instanceof ApiRequestError ? error.message : LOAD_ERROR_MESSAGE,
+          error instanceof ApiRequestError
+            ? error.message
+            : GENERIC_ERROR_MESSAGE,
         )
       }
     }
@@ -72,16 +78,39 @@ function useQueueDetail(publicToken: string) {
       isActive = false
       clearInterval(timer)
     }
-  }, [publicToken])
+  }, [publicToken, refreshCount])
 
-  return { queue, errorMessage }
+  const refresh = () => setRefreshCount((count) => count + 1)
+
+  return { queue, errorMessage, refresh }
 }
 
 export default function QueueStatusPage({ params }: QueueStatusPageProps) {
   const { id } = use(params)
-  const { queue, errorMessage } = useQueueDetail(id)
+  const { queue, errorMessage, refresh } = useQueueDetail(id)
   const { permission, requestPermission } = useNotificationPermission()
-    useTurnNotification(queue?.queueStatus, queue?.booth.name, permission)
+  const [isCancelOpen, setIsCancelOpen] = useState(false)
+  const [isCancelling, setIsCancelling] = useState(false)
+  const [cancelError, setCancelError] = useState("")
+
+  useTurnNotification(queue?.queueStatus, queue?.booth.name, permission)
+
+  const handleConfirmCancel = async () => {
+    setIsCancelling(true)
+    setCancelError("")
+
+    try {
+      await cancelQueue(id)
+    } catch (error) {
+      setCancelError(
+        error instanceof ApiRequestError ? error.message : GENERIC_ERROR_MESSAGE,
+      )
+    } finally {
+      setIsCancelling(false)
+      setIsCancelOpen(false)
+      refresh()
+    }
+  }
 
   // A failed refresh keeps showing the last known queue; only the first load shows an error.
   if (!queue) {
@@ -101,7 +130,7 @@ export default function QueueStatusPage({ params }: QueueStatusPageProps) {
   }
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-1 flex-col gap-6">
       <div>
         <BranchLocationBadge
           boothName={queue.booth.name}
@@ -121,6 +150,32 @@ export default function QueueStatusPage({ params }: QueueStatusPageProps) {
       )}
 
       <p className="text-foreground/70">{AUTO_REFRESH_NOTE}</p>
+
+      {queue.queueStatus === "WAITING" && (
+        <div className="mt-auto flex flex-col gap-3">
+          {cancelError && (
+            <p role="alert" className="text-error">
+              {cancelError}
+            </p>
+          )}
+          <Button
+            type="button"
+            variant="outline"
+            className="h-12 w-full border-error text-base font-bold text-error"
+            onClick={() => setIsCancelOpen(true)}
+          >
+            Batalkan Antrean
+          </Button>
+        </div>
+      )}
+
+      <CancelDialog
+        open={isCancelOpen}
+        onOpenChange={setIsCancelOpen}
+        queueNumber={queueNumber}
+        onConfirm={handleConfirmCancel}
+        isLoading={isCancelling}
+      />
     </div>
   )
 }
