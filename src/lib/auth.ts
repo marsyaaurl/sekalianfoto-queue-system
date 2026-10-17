@@ -103,7 +103,7 @@ export async function getAdminSession() {
 
   const user = await prisma.user.findUnique({
     where: { id: payload.userId },
-    select: { id: true, role: true },
+    select: { id: true, role: true, email: true },
   });
   return user?.role === "ADMIN" ? user : null;
 }

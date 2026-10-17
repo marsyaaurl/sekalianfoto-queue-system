@@ -40,7 +40,7 @@ const STATUS_STYLES: Record<QueueStatus, StatusStyle> = {
   done: {
     label: "Selesai",
     icon: CheckCheckIcon,
-    className: "bg-muted text-muted-foreground",
+    className: "bg-success-light text-success-dark",
   },
   canceled: {
     label: "Dibatalkan",
