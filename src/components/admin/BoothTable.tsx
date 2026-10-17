@@ -26,6 +26,7 @@ export interface BoothTableProps {
   onDownloadQr: (id: string) => void
   onEdit: (id: string) => void
   onDelete: (id: string) => void
+  pendingBoothId?: string | null
 }
 
 const COLUMN_HEADERS = [
@@ -37,6 +38,7 @@ const COLUMN_HEADERS = [
 ] as const
 
 const QUEUE_COUNT_UNIT = "orang"
+const EMPTY_QUEUE_LABEL = "Kosong"
 
 const ICON_BUTTON_CLASS = "rounded-lg"
 const DELETE_BUTTON_CLASS =
@@ -44,19 +46,31 @@ const DELETE_BUTTON_CLASS =
 
 interface QrActionsProps {
   booth: Booth
+  isPending: boolean
   onViewQr: (id: string) => void
   onDownloadQr: (id: string) => void
 }
 
-function QrActions({ booth, onViewQr, onDownloadQr }: QrActionsProps) {
+function QrActions({
+  booth,
+  isPending,
+  onViewQr,
+  onDownloadQr,
+}: QrActionsProps) {
   return (
     <div className="flex items-center gap-2">
-      <Button variant="outline" size="sm" onClick={() => onViewQr(booth.id)}>
+      <Button
+        variant="outline"
+        size="sm"
+        disabled={isPending}
+        onClick={() => onViewQr(booth.id)}
+      >
         Lihat QR
       </Button>
       <Button
         variant="outline"
         size="sm"
+        disabled={isPending}
         onClick={() => onDownloadQr(booth.id)}
       >
         Unduh
@@ -67,17 +81,24 @@ function QrActions({ booth, onViewQr, onDownloadQr }: QrActionsProps) {
 
 interface ManageActionsProps {
   booth: Booth
+  isPending: boolean
   onEdit: (id: string) => void
   onDelete: (id: string) => void
 }
 
-function ManageActions({ booth, onEdit, onDelete }: ManageActionsProps) {
+function ManageActions({
+  booth,
+  isPending,
+  onEdit,
+  onDelete,
+}: ManageActionsProps) {
   return (
     <div className="flex items-center gap-2">
       <Button
         variant="outline"
         size="icon-lg"
         className={ICON_BUTTON_CLASS}
+        disabled={isPending}
         aria-label={`Ubah ${booth.name}`}
         onClick={() => onEdit(booth.id)}
       >
@@ -87,6 +108,7 @@ function ManageActions({ booth, onEdit, onDelete }: ManageActionsProps) {
         variant="outline"
         size="icon-lg"
         className={cn(ICON_BUTTON_CLASS, DELETE_BUTTON_CLASS)}
+        disabled={isPending}
         aria-label={`Hapus ${booth.name}`}
         onClick={() => onDelete(booth.id)}
       >
@@ -94,6 +116,10 @@ function ManageActions({ booth, onEdit, onDelete }: ManageActionsProps) {
       </Button>
     </div>
   )
+}
+
+function formatActiveQueue(count: number): string {
+  return count === 0 ? EMPTY_QUEUE_LABEL : `${count} ${QUEUE_COUNT_UNIT}`
 }
 
 function EmptyRow() {
@@ -115,6 +141,7 @@ export function BoothTable({
   onDownloadQr,
   onEdit,
   onDelete,
+  pendingBoothId = null,
 }: BoothTableProps) {
   return (
     <div className="overflow-hidden rounded-xl border">
@@ -138,11 +165,12 @@ export function BoothTable({
               <TableCell className="px-4 font-bold">{booth.name}</TableCell>
               <TableCell className="px-4">{booth.branch}</TableCell>
               <TableCell className="px-4">
-                {booth.activeQueueCount} {QUEUE_COUNT_UNIT}
+                {formatActiveQueue(booth.activeQueueCount)}
               </TableCell>
               <TableCell className="px-4">
                 <QrActions
                   booth={booth}
+                  isPending={pendingBoothId === booth.id}
                   onViewQr={onViewQr}
                   onDownloadQr={onDownloadQr}
                 />
@@ -150,6 +178,7 @@ export function BoothTable({
               <TableCell className="px-4">
                 <ManageActions
                   booth={booth}
+                  isPending={pendingBoothId === booth.id}
                   onEdit={onEdit}
                   onDelete={onDelete}
                 />
