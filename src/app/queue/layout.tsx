@@ -7,16 +7,16 @@ interface QueueLayoutProps {
 
 export default function QueueLayout({ children }: QueueLayoutProps) {
   return (
-    <div className="flex min-h-screen flex-col">
-      <header className="bg-muted-foreground">
-        <div className="mx-auto w-full max-w-md px-6">
+    <div className="flex min-h-screen flex-col bg-background">
+      <header className="sticky top-4 z-10 mx-auto mt-4 flex h-16 w-[calc(100%-2rem)] max-w-md items-center rounded-full border border-white/10 bg-foreground/95 px-6 shadow-[0_10px_30px_rgb(50_35_28/0.24)] backdrop-blur-xl">
+        <div>
           <Image
-            src="/logo.png"
+            src="/logov2.png"
             alt="Sekalian Foto"
-            width={160}
-            height={40}
+            width={140}
+            height={20}
             priority
-            className="-ml-3 -translate-y-3 h-18 w-auto"
+            className="h-8 w-auto object-contain"
           />
         </div>
       </header>
