@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma, QueueStatus } from "@/lib/prisma";
 import { getAdminSession } from "@/lib/auth";
 
+const SESSION_DURATION_MINUTES = 5;
+
 export async function PATCH(
     _req: NextRequest,
     { params }: { params: Promise<{ id: string }> }
@@ -106,12 +108,19 @@ export async function PATCH(
 
             if (!next) return null;
 
+            const estimatedEndAt = new Date(
+                Date.now() + SESSION_DURATION_MINUTES * 60 * 1000
+            );
+
             await tx.queue.update({
                 where: { id: next.id },
-                data: { queueStatus: QueueStatus.IN_TURN },
+                data: {
+                    queueStatus: QueueStatus.IN_TURN,
+                    estimatedEndAt,
+                },
             });
 
-            return next;
+            return { ...next, estimatedEndAt };
         });
 
         return NextResponse.json(
