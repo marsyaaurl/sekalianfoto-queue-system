@@ -8,6 +8,54 @@ const updateBoothSchema = z.object({
     branch: z.string().trim().min(5, "Branch name must be at least 5 characters."),
 });
 
+// Public display data used by the QR-code queue registration page.
+export async function GET(
+    _req: NextRequest,
+    { params }: { params: Promise<{ id: string }> }
+) {
+    try {
+        const { id } = await params;
+        const booth = await prisma.booth.findUnique({
+            where: { id },
+            select: {
+                name: true,
+                branch: true,
+            },
+        });
+
+        if (!booth) {
+            return NextResponse.json(
+                {
+                    error: {
+                        code: "NOT_FOUND",
+                        message: "Booth not found.",
+                    },
+                },
+                { status: 404 }
+            );
+        }
+
+        return NextResponse.json(
+            {
+                message: "Booth data successfully retrieved.",
+                data: booth,
+            },
+            { status: 200 }
+        );
+    } catch (err) {
+        console.error("Unexpected error on getting booth data.", err);
+        return NextResponse.json(
+            {
+                error: {
+                    code: "INTERNAL_SERVER_ERROR",
+                    message: "Internal server error.",
+                },
+            },
+            { status: 500 }
+        );
+    }
+}
+
 export async function PATCH(
     req: NextRequest,
     { params }: { params: Promise<{ id: string }> }

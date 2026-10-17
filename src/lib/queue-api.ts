@@ -37,6 +37,11 @@ export interface CreatedQueue {
   }
 }
 
+export interface BoothDetail {
+  name: string
+  branch: string
+}
+
 export interface QueueDetail {
   queueNumber: number
   custName: string
@@ -77,6 +82,11 @@ const CREATE_ERRORS: ErrorMessages = {
 
 const GET_ERRORS: ErrorMessages = {
   notFound: "Antrean tidak ditemukan.",
+  badRequest: GENERIC_ERROR_MESSAGE,
+}
+
+const BOOTH_ERRORS: ErrorMessages = {
+  notFound: "Booth tidak ditemukan. Coba scan ulang QR code di booth.",
   badRequest: GENERIC_ERROR_MESSAGE,
 }
 
@@ -226,6 +236,16 @@ export async function getQueue(publicToken: string): Promise<QueueDetail> {
     `/api/queue/${encodeURIComponent(publicToken)}`,
     { method: "GET", cache: "no-store" },
     GET_ERRORS,
+  )
+}
+
+export async function getBooth(idBooth: string): Promise<BoothDetail> {
+  if (USE_MOCK) return MOCK_BOOTH
+
+  return requestData<BoothDetail>(
+    `/api/booth/${encodeURIComponent(idBooth)}`,
+    { method: "GET", cache: "no-store" },
+    BOOTH_ERRORS,
   )
 }
 

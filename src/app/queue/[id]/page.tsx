@@ -145,9 +145,10 @@ export default function QueueStatusPage({ params }: QueueStatusPageProps) {
         badge={<QueueStatusBadge status={BADGE_STATUS[queue.queueStatus]} />}
       />
 
-      {permission === "default" && (
-        <NotificationBanner onEnable={requestPermission} />
-      )}
+      <NotificationBanner
+        permission={permission}
+        onEnable={requestPermission}
+      />
 
       <p className="leading-relaxed text-muted-foreground">
         {AUTO_REFRESH_NOTE}
