@@ -2,7 +2,9 @@
 
 import Image from "next/image"
 import Link from "next/link"
-import { usePathname } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
+import { useState } from "react"
+import { LogOutIcon } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 
@@ -18,6 +20,13 @@ const NAV_ITEMS: readonly NavItem[] = [
 
 const LOGO_WIDTH = 150
 const LOGO_HEIGHT = 45
+
+const LOGOUT_ENDPOINT = "/api/auth/logout"
+const LOGIN_PATH = "/auth/login"
+
+interface SidebarProps {
+  email: string
+}
 
 interface SidebarNavLinkProps {
   item: NavItem
@@ -41,11 +50,42 @@ function SidebarNavLink({ item, isActive }: SidebarNavLinkProps) {
   )
 }
 
-export function Sidebar() {
+function SidebarLogoutButton() {
+  const router = useRouter()
+  const [isLoggingOut, setIsLoggingOut] = useState(false)
+
+  const handleLogout = async () => {
+    setIsLoggingOut(true)
+    const response = await fetch(LOGOUT_ENDPOINT, { method: "POST" }).catch(
+      () => null
+    )
+    setIsLoggingOut(false)
+
+    // Stay on the page when logout fails, so the user can try again.
+    if (!response?.ok) return
+    router.push(LOGIN_PATH)
+    router.refresh()
+  }
+
+  return (
+    <button
+      type="button"
+      aria-label="Logout"
+      title="Logout"
+      disabled={isLoggingOut}
+      onClick={handleLogout}
+      className="flex size-10 shrink-0 items-center justify-center rounded-lg text-error transition-colors hover:bg-sidebar-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring disabled:opacity-50"
+    >
+      <LogOutIcon aria-hidden className="size-5" />
+    </button>
+  )
+}
+
+export function Sidebar({ email }: SidebarProps) {
   const pathname = usePathname()
 
   return (
-    <aside className="flex min-h-screen w-64 shrink-0 flex-col gap-8 bg-sidebar p-4 text-sidebar-foreground">
+    <aside className="flex min-h-screen w-64 shrink-0 flex-col bg-sidebar p-4 text-sidebar-foreground">
       <Image
         src="/logo.png"
         alt="Sekalian foto"
@@ -54,7 +94,7 @@ export function Sidebar() {
         priority
         className="mt-2 ml-2"
       />
-      <nav aria-label="Navigasi admin" className="flex flex-col gap-2">
+      <nav aria-label="Navigasi admin" className="mt-8 flex flex-col gap-2">
         {NAV_ITEMS.map((item) => (
           <SidebarNavLink
             key={item.href}
@@ -63,6 +103,21 @@ export function Sidebar() {
           />
         ))}
       </nav>
+      <div className="mt-auto flex items-center gap-3 border-t border-sidebar-border px-1 pt-4">
+        <span
+          aria-hidden="true"
+          className="flex size-10 shrink-0 items-center justify-center rounded-full bg-sidebar-accent text-sidebar-foreground"
+        >
+          {email.charAt(0).toUpperCase()}
+        </span>
+        <div className="min-w-0 flex flex-col gap-0.5">
+          <p className="truncate text-sm font-medium">Admin</p>
+          <p className="text-xs truncate tracking-wide text-sidebar-foreground/60">
+            {email}
+          </p>
+        </div>
+        <SidebarLogoutButton />
+      </div>
     </aside>
   )
 }

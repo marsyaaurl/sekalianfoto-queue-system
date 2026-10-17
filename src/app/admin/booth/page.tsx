@@ -219,7 +219,7 @@ export default function AdminBoothPage() {
     <div className="flex flex-col gap-6">
       <header className="flex items-center justify-between gap-4">
         <h1 className="text-4xl font-bold">Booth</h1>
-        <Button size="lg" className="h-12 px-5 text-base" onClick={() => openForm(null)}>
+        <Button size="lg" className="h-12 px-6 text-lg" onClick={() => openForm(null)}>
           <PlusIcon />
           Tambah booth
         </Button>

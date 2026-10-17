@@ -43,6 +43,8 @@ export interface RowActionAvailability {
 
 const EXTEND_SESSION_MINUTES = 5
 const EMPTY_PHONE_PLACEHOLDER = "-"
+const STATUS_BADGE_CLASS = "h-8 px-3.5 text-base"
+const ROW_BUTTON_CLASS = "h-10 px-4 text-base"
 const COLUMN_HEADERS = ["No.", "Nama", "No. telepon", "Status", "Aksi"] as const
 
 // Only one entry can be active at a time; these statuses mean "inside the booth".
@@ -121,7 +123,7 @@ export function getRowActions(
 function StatusBadge({ status }: { status: QueueEntryStatus }) {
   const { label, variant, className } = STATUS_PILLS[status]
   return (
-    <Badge variant={variant} className={className}>
+    <Badge variant={variant} className={cn(STATUS_BADGE_CLASS, className)}>
       {label}
     </Badge>
   )
@@ -149,6 +151,7 @@ function RowActions({
       {actions.canStart && (
         <Button
           size="sm"
+          className={ROW_BUTTON_CLASS}
           disabled={isPending}
           onClick={() => onStartSession(entry.id)}
         >
@@ -159,6 +162,7 @@ function RowActions({
         <Button
           variant="outline"
           size="sm"
+          className={ROW_BUTTON_CLASS}
           disabled={isPending}
           onClick={() => onExtendSession(entry.id)}
         >
@@ -168,6 +172,7 @@ function RowActions({
       {actions.canEnd && (
         <Button
           size="sm"
+          className={ROW_BUTTON_CLASS}
           disabled={isPending}
           onClick={() => onEndSession(entry.id)}
         >
@@ -200,7 +205,7 @@ export function QueueTable({
 }: QueueTableProps) {
   return (
     <div className="overflow-hidden rounded-xl border">
-      <Table>
+      <Table className="text-lg">
         <TableHeader className="bg-muted">
           <TableRow>
             {COLUMN_HEADERS.map((header) => (
@@ -218,7 +223,7 @@ export function QueueTable({
           {sortByQueueNumber(entries).map((entry) => (
             <TableRow
               key={entry.id}
-              className={cn("h-14", isActiveEntry(entry) && "bg-accent/10")}
+              className={cn("h-16", isActiveEntry(entry) && "bg-accent/10")}
             >
               <TableCell className="px-4 font-bold">
                 {entry.queueNumber}

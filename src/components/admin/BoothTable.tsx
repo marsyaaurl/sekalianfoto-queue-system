@@ -40,6 +40,7 @@ const COLUMN_HEADERS = [
 const QUEUE_COUNT_UNIT = "orang"
 const EMPTY_QUEUE_LABEL = "Kosong"
 
+const ROW_BUTTON_CLASS = "h-10 px-4 text-base"
 const ICON_BUTTON_CLASS = "rounded-lg"
 const DELETE_BUTTON_CLASS =
   "text-destructive border-destructive/50 hover:bg-destructive/10 hover:text-destructive"
@@ -62,6 +63,7 @@ function QrActions({
       <Button
         variant="outline"
         size="sm"
+        className={ROW_BUTTON_CLASS}
         disabled={isPending}
         onClick={() => onViewQr(booth.id)}
       >
@@ -70,6 +72,7 @@ function QrActions({
       <Button
         variant="outline"
         size="sm"
+        className={ROW_BUTTON_CLASS}
         disabled={isPending}
         onClick={() => onDownloadQr(booth.id)}
       >
@@ -145,7 +148,7 @@ export function BoothTable({
 }: BoothTableProps) {
   return (
     <div className="overflow-hidden rounded-xl border">
-      <Table>
+      <Table className="text-lg">
         <TableHeader className="bg-muted">
           <TableRow>
             {COLUMN_HEADERS.map((header) => (

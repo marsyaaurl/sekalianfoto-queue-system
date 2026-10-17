@@ -4,6 +4,7 @@ import type { Booth } from "@/components/admin/BoothTable"
 
 export interface ManagedBooth extends Booth {
   qrFilePath: string | null
+  activeQueueCount: number
 }
 
 export interface BoothInput {
@@ -23,6 +24,7 @@ interface BoothRecord {
   name: string
   branch: string
   qrFilePath: string | null
+  activeQueueCount: number
 }
 
 interface ApiResponse {
@@ -38,9 +40,6 @@ const NETWORK_ERROR_STATUS = 0
 const HTTP_BAD_REQUEST = 400
 const HTTP_UNAUTHORIZED = 401
 const HTTP_NOT_FOUND = 404
-
-// The API does not return the active queue count yet. Remove this once it does.
-const ACTIVE_QUEUE_COUNT_FALLBACK = 0
 
 const QR_FILE_EXTENSION = "png"
 const BOOTH_SLUG_FALLBACK = "booth"
@@ -95,7 +94,7 @@ function toManagedBooth(record: BoothRecord): ManagedBooth {
     name: record.name,
     branch: record.branch,
     qrFilePath: record.qrFilePath,
-    activeQueueCount: ACTIVE_QUEUE_COUNT_FALLBACK,
+    activeQueueCount: record.activeQueueCount,
   }
 }
 
@@ -222,6 +221,7 @@ export function useBooths() {
     loadError,
     pendingBoothId,
     isCreating,
+    refetch,
     retry,
     createBooth,
     updateBooth,

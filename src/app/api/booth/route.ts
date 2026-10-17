@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { prisma, QueueStatus } from "@/lib/prisma";
 import { z } from "zod";
 import { getAdminSession } from "@/lib/auth";
+import { getJakartaBusinessDate } from "@/lib/date";
 
 const createBoothSchema = z.object({
     name: z.string().trim().min(5, "Booth name must be at least 5 characters."),
@@ -66,7 +67,10 @@ export async function POST(req: NextRequest) {
         return NextResponse.json(
             {
                 message: "Booth created successfully.",
-                data: updatedBooth,
+                data: {
+                    ...updatedBooth,
+                    activeQueueCount: 0,
+                },
             },
             { status: 201 }
         );
@@ -100,23 +104,50 @@ export async function GET() {
             )
         }
 
-        const booths = await prisma.booth.findMany({
-            select: {
-                id: true,
-                name: true,
-                branch: true,
-                qrFilePath: true,
-                createdAt: true,
-            },
-            orderBy: {
-                createdAt: "desc"
-            }
-        })
+        const businessDate = getJakartaBusinessDate()
+        const [booths, queueCounts] = await Promise.all([
+            prisma.booth.findMany({
+                select: {
+                    id: true,
+                    name: true,
+                    branch: true,
+                    qrFilePath: true,
+                    createdAt: true,
+                },
+                orderBy: {
+                    createdAt: "desc"
+                }
+            }),
+            prisma.queue.groupBy({
+                by: ["idBooth"],
+                where: {
+                    date: businessDate,
+                    queueStatus: {
+                        in: [
+                            QueueStatus.WAITING,
+                            QueueStatus.IN_TURN,
+                            QueueStatus.EXTENDED,
+                        ],
+                    },
+                },
+                _count: {
+                    _all: true,
+                },
+            }),
+        ])
+
+        const queueCountByBooth = new Map(
+            queueCounts.map(({ idBooth, _count }) => [idBooth, _count._all]),
+        )
+        const boothsWithCounts = booths.map((booth) => ({
+            ...booth,
+            activeQueueCount: queueCountByBooth.get(booth.id) ?? 0,
+        }))
 
         return NextResponse.json(
             {
                 message: "Booths data successfully retrieved.",
-                data: booths,
+                data: boothsWithCounts,
             },
             { status: 200 }
         )
