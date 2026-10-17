@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 import { BellIcon, BellOffIcon, CircleCheckIcon } from "lucide-react"
+=======
+import { BellIcon } from "lucide-react"
+>>>>>>> 56ecbf7ec100feaa4189ebacf35aa6eca1414e27
 
 import { Button } from "@/components/ui/button"
 import type { NotificationPermissionState } from "@/lib/use-notification-permission"
