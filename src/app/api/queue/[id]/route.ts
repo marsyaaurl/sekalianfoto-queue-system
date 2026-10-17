@@ -1,8 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { prisma, QueueStatus } from "@/lib/prisma";
+
+const SESSION_DURATION_MINUTES = 5;
+const ACTIVE_QUEUE_STATUSES = [
+    QueueStatus.WAITING,
+    QueueStatus.IN_TURN,
+    QueueStatus.EXTENDED,
+];
 
 export async function GET(
-    req: NextRequest,
+    _req: NextRequest,
     { params }: { params: Promise<{ id: string }> }
 ) {
     try {
@@ -35,11 +42,41 @@ export async function GET(
             )
         }
 
+        const queuesAhead = await prisma.queue.findMany({
+            where: {
+                idBooth: queue.idBooth,
+                date: queue.date,
+                queueNumber: { lt: queue.queueNumber },
+                queueStatus: { in: ACTIVE_QUEUE_STATUSES },
+            },
+            select: {
+                queueStatus: true,
+            },
+        });
+
+        const peopleAhead = queuesAhead.length;
+        const estimatedWaitMinutes = queuesAhead.reduce(
+            (totalMinutes, queueAhead) =>
+                totalMinutes +
+                SESSION_DURATION_MINUTES +
+                (queueAhead.queueStatus === QueueStatus.EXTENDED
+                    ? SESSION_DURATION_MINUTES
+                    : 0),
+            0
+        );
+
         return NextResponse.json(
-            { message: "Queue data successfully retrieved.", data: queue },
+            {
+                message: "Queue data successfully retrieved.",
+                data: {
+                    ...queue,
+                    peopleAhead,
+                    estimatedWaitMinutes,
+                },
+            },
             { status: 200 }
         )
-    } catch (err) {
+    } catch {
         console.error("Unexpected error on getting queue.")
 
         return NextResponse.json(

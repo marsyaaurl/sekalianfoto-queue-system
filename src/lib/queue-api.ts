@@ -44,10 +44,9 @@ export interface QueueDetail {
   estimatedEndAt: string
   date: string
   idBooth: string
-  // Not in the API yet: the status page shows a placeholder when missing.
-  peopleAhead?: number
+  peopleAhead: number
   boothCode?: string
-  estimatedWaitMinutes?: number
+  estimatedWaitMinutes: number
   booth: {
     name: string
     branch: string
