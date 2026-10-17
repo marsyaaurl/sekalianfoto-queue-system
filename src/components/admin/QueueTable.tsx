@@ -12,7 +12,12 @@ import {
 } from "@/components/ui/table"
 import { cn } from "@/lib/utils"
 
-export type QueueEntryStatus = "IN_BOOTH" | "WAITING"
+export type QueueEntryStatus =
+  | "WAITING"
+  | "IN_TURN"
+  | "EXTENDED"
+  | "DONE"
+  | "CANCELED"
 
 export interface QueueEntry {
   id: string
@@ -24,66 +29,151 @@ export interface QueueEntry {
 
 export interface QueueTableProps {
   entries: QueueEntry[]
+  onStartSession: (id: string) => void
   onExtendSession: (id: string) => void
   onEndSession: (id: string) => void
-  onCancel: (id: string) => void
+  pendingEntryId?: string | null
+}
+
+export interface RowActionAvailability {
+  canStart: boolean
+  canExtend: boolean
+  canEnd: boolean
 }
 
 const EXTEND_SESSION_MINUTES = 5
 const EMPTY_PHONE_PLACEHOLDER = "-"
 const COLUMN_HEADERS = ["No.", "Nama", "No. telepon", "Status", "Aksi"] as const
 
-const CANCEL_BUTTON_CLASS =
-  "text-destructive border-destructive/50 hover:bg-destructive/10"
+// Only one entry can be active at a time; these statuses mean "inside the booth".
+const ACTIVE_STATUSES: readonly QueueEntryStatus[] = ["IN_TURN", "EXTENDED"]
+
+const NO_ACTIONS: RowActionAvailability = {
+  canStart: false,
+  canExtend: false,
+  canEnd: false,
+}
+const ACTIVE_ROW_ACTIONS: RowActionAvailability = {
+  canStart: false,
+  canExtend: true,
+  canEnd: true,
+}
+const START_ROW_ACTIONS: RowActionAvailability = {
+  canStart: true,
+  canExtend: false,
+  canEnd: false,
+}
+
+interface StatusPill {
+  label: string
+  variant: "destructive" | "secondary" | "outline"
+  className?: string
+}
+
+// Every pill carries a text label, so meaning never relies on colour alone.
+const STATUS_PILLS: Record<QueueEntryStatus, StatusPill> = {
+  WAITING: { label: "Menunggu", variant: "secondary" },
+  IN_TURN: { label: "Di dalam booth", variant: "destructive" },
+  EXTENDED: { label: "Di dalam booth", variant: "destructive" },
+  DONE: {
+    label: "Selesai",
+    variant: "secondary",
+    className: "bg-success-light text-success-dark",
+  },
+  CANCELED: {
+    label: "Dibatalkan",
+    variant: "outline",
+    className: "text-muted-foreground",
+  },
+}
+
+function isActiveEntry(entry: QueueEntry): boolean {
+  return ACTIVE_STATUSES.includes(entry.status)
+}
+
+// "A010" -> 10. Entries without digits sort last.
+function getQueueNumberValue(queueNumber: string): number {
+  const digits = queueNumber.match(/\d+/)
+  return digits ? Number(digits[0]) : Number.POSITIVE_INFINITY
+}
+
+function sortByQueueNumber(entries: QueueEntry[]): QueueEntry[] {
+  return [...entries].sort(
+    (a, b) =>
+      getQueueNumberValue(a.queueNumber) - getQueueNumberValue(b.queueNumber)
+  )
+}
+
+export function getRowActions(
+  entry: QueueEntry,
+  entries: QueueEntry[]
+): RowActionAvailability {
+  if (isActiveEntry(entry)) return ACTIVE_ROW_ACTIONS
+  if (entry.status !== "WAITING") return NO_ACTIONS
+  if (entries.some(isActiveEntry)) return NO_ACTIONS
+
+  const earliestWaiting = sortByQueueNumber(entries).find(
+    (candidate) => candidate.status === "WAITING"
+  )
+  return earliestWaiting?.id === entry.id ? START_ROW_ACTIONS : NO_ACTIONS
+}
 
 function StatusBadge({ status }: { status: QueueEntryStatus }) {
-  if (status === "IN_BOOTH") {
-    return <Badge variant="destructive">Di dalam booth</Badge>
-  }
-  return <Badge variant="secondary">Menunggu</Badge>
+  const { label, variant, className } = STATUS_PILLS[status]
+  return (
+    <Badge variant={variant} className={className}>
+      {label}
+    </Badge>
+  )
 }
 
 interface RowActionsProps {
   entry: QueueEntry
+  actions: RowActionAvailability
+  isPending: boolean
+  onStartSession: (id: string) => void
   onExtendSession: (id: string) => void
   onEndSession: (id: string) => void
-  onCancel: (id: string) => void
 }
 
 function RowActions({
   entry,
+  actions,
+  isPending,
+  onStartSession,
   onExtendSession,
   onEndSession,
-  onCancel,
 }: RowActionsProps) {
-  const cancelButton = (
-    <Button
-      variant="outline"
-      size="sm"
-      className={CANCEL_BUTTON_CLASS}
-      onClick={() => onCancel(entry.id)}
-    >
-      Batalkan
-    </Button>
-  )
-
-  if (entry.status === "WAITING") {
-    return cancelButton
-  }
-
   return (
     <div className="flex items-center gap-2">
-      <Button
-        variant="outline"
-        size="sm"
-        onClick={() => onExtendSession(entry.id)}
-      >
-        Extend +{EXTEND_SESSION_MINUTES}
-      </Button>
-      {cancelButton}
-      <Button size="sm" onClick={() => onEndSession(entry.id)}>
-        End session
-      </Button>
+      {actions.canStart && (
+        <Button
+          size="sm"
+          disabled={isPending}
+          onClick={() => onStartSession(entry.id)}
+        >
+          Start session
+        </Button>
+      )}
+      {actions.canExtend && (
+        <Button
+          variant="outline"
+          size="sm"
+          disabled={isPending}
+          onClick={() => onExtendSession(entry.id)}
+        >
+          Extend +{EXTEND_SESSION_MINUTES}
+        </Button>
+      )}
+      {actions.canEnd && (
+        <Button
+          size="sm"
+          disabled={isPending}
+          onClick={() => onEndSession(entry.id)}
+        >
+          End session
+        </Button>
+      )}
     </div>
   )
 }
@@ -103,9 +193,10 @@ function EmptyRow() {
 
 export function QueueTable({
   entries,
+  onStartSession,
   onExtendSession,
   onEndSession,
-  onCancel,
+  pendingEntryId = null,
 }: QueueTableProps) {
   return (
     <div className="overflow-hidden rounded-xl border">
@@ -124,13 +215,10 @@ export function QueueTable({
         </TableHeader>
         <TableBody>
           {entries.length === 0 && <EmptyRow />}
-          {entries.map((entry) => (
+          {sortByQueueNumber(entries).map((entry) => (
             <TableRow
               key={entry.id}
-              className={cn(
-                "h-14",
-                entry.status === "IN_BOOTH" && "bg-accent/10"
-              )}
+              className={cn("h-14", isActiveEntry(entry) && "bg-accent/10")}
             >
               <TableCell className="px-4 font-bold">
                 {entry.queueNumber}
@@ -145,9 +233,11 @@ export function QueueTable({
               <TableCell className="px-4">
                 <RowActions
                   entry={entry}
+                  actions={getRowActions(entry, entries)}
+                  isPending={pendingEntryId === entry.id}
+                  onStartSession={onStartSession}
                   onExtendSession={onExtendSession}
                   onEndSession={onEndSession}
-                  onCancel={onCancel}
                 />
               </TableCell>
             </TableRow>
