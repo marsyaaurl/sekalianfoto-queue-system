@@ -9,7 +9,7 @@ import QueueStatusBadge, {
 import CancelDialog from "@/components/cust/CancelDialog"
 import NotificationBanner from "@/components/cust/NotificationBanner"
 import QueueCard from "@/components/cust/QueueCard"
-import YourTurnView from "@/components/cust/YourTurnView"
+import QueueStatusView from "@/components/cust/QueueStatusView"
 import { Button } from "@/components/ui/button"
 import {
   ApiRequestError,
@@ -125,8 +125,15 @@ export default function QueueStatusPage({ params }: QueueStatusPageProps) {
 
   const queueNumber = formatQueueNumber(queue.boothCode, queue.queueNumber)
 
-  if (queue.queueStatus === "IN_TURN") {
-    return <YourTurnView queueNumber={queueNumber} boothName={queue.booth.name} />
+  if (queue.queueStatus === "IN_TURN" || queue.queueStatus === "DONE") {
+    return (
+      <QueueStatusView
+        queueNumber={queueNumber}
+        boothName={queue.booth.name}
+        branch={queue.booth.branch}
+        status={queue.queueStatus === "IN_TURN" ? "in_turn" : "done"}
+      />
+    )
   }
 
   return (
