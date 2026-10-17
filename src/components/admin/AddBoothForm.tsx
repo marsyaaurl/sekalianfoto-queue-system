@@ -19,13 +19,29 @@ export interface AddBoothFormValues {
   branch: string
 }
 
+export type AddBoothFormMode = "create" | "edit"
+
 export interface AddBoothFormProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   onSubmit: (values: AddBoothFormValues) => void
+  mode?: AddBoothFormMode
+  initialValues?: AddBoothFormValues
+  isSubmitting?: boolean
+  errorMessage?: string | null
 }
 
 const NAME_REQUIRED_ERROR = "Nama booth wajib diisi."
+const EMPTY_VALUES: AddBoothFormValues = { name: "", branch: "" }
+
+// The edit copy is a placeholder: no design exists for it yet.
+const MODE_COPY: Record<
+  AddBoothFormMode,
+  { title: string; submitLabel: string }
+> = {
+  create: { title: "Tambah booth baru", submitLabel: "Simpan booth" },
+  edit: { title: "Edit booth", submitLabel: "Simpan perubahan" },
+}
 const LABEL_CLASS = "text-base font-semibold"
 const INPUT_CLASS = "h-11 bg-card px-3"
 
@@ -35,12 +51,22 @@ function getNameError(name: string): string | null {
 
 interface AddBoothFieldsProps {
   onSubmit: (values: AddBoothFormValues) => void
+  initialValues: AddBoothFormValues
+  submitLabel: string
+  isSubmitting: boolean
+  errorMessage: string | null
 }
 
 // Lives inside DialogContent, which unmounts on close, so the form resets itself.
-function AddBoothFields({ onSubmit }: AddBoothFieldsProps) {
-  const [name, setName] = useState("")
-  const [branch, setBranch] = useState("")
+function AddBoothFields({
+  onSubmit,
+  initialValues,
+  submitLabel,
+  isSubmitting,
+  errorMessage,
+}: AddBoothFieldsProps) {
+  const [name, setName] = useState(initialValues.name)
+  const [branch, setBranch] = useState(initialValues.branch)
   const [nameError, setNameError] = useState<string | null>(null)
 
   const nameId = useId()
@@ -93,11 +119,22 @@ function AddBoothFields({ onSubmit }: AddBoothFieldsProps) {
           onChange={(event) => setBranch(event.target.value)}
         />
       </div>
+      {errorMessage && (
+        <p role="alert" className="text-sm text-destructive">
+          {errorMessage}
+        </p>
+      )}
       <DialogFooter>
-        <DialogClose render={<Button type="button" variant="outline" />}>
+        <DialogClose
+          render={
+            <Button type="button" variant="outline" disabled={isSubmitting} />
+          }
+        >
           Batal
         </DialogClose>
-        <Button type="submit">Simpan booth</Button>
+        <Button type="submit" disabled={isSubmitting}>
+          {submitLabel}
+        </Button>
       </DialogFooter>
     </form>
   )
@@ -107,14 +144,31 @@ export function AddBoothForm({
   open,
   onOpenChange,
   onSubmit,
+  mode = "create",
+  initialValues = EMPTY_VALUES,
+  isSubmitting = false,
+  errorMessage = null,
 }: AddBoothFormProps) {
+  const { title, submitLabel } = MODE_COPY[mode]
+
+  // Keep the dialog open while the request is running.
+  function handleOpenChange(nextOpen: boolean) {
+    if (!isSubmitting) onOpenChange(nextOpen)
+  }
+
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent showCloseButton={false}>
         <DialogHeader>
-          <DialogTitle className="text-2xl">Tambah booth baru</DialogTitle>
+          <DialogTitle className="text-2xl">{title}</DialogTitle>
         </DialogHeader>
-        <AddBoothFields onSubmit={onSubmit} />
+        <AddBoothFields
+          onSubmit={onSubmit}
+          initialValues={initialValues}
+          submitLabel={submitLabel}
+          isSubmitting={isSubmitting}
+          errorMessage={errorMessage}
+        />
       </DialogContent>
     </Dialog>
   )
