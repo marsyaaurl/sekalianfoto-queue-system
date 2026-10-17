@@ -38,7 +38,7 @@ export default function CancelDialog({
         className="top-auto bottom-4 translate-y-0"
       >
         <DialogHeader>
-          <DialogTitle className="text-2xl font-bold">
+          <DialogTitle className="text-2xl">
             Batalkan antrean?
           </DialogTitle>
           <DialogDescription className="text-base">
@@ -59,7 +59,7 @@ export default function CancelDialog({
             Tetap Antre
           </DialogClose>
           <Button
-            className="h-12 w-full bg-error text-base font-bold text-white hover:bg-error-normal-hover"
+            className="h-12 w-full text-base font-bold"
             onClick={onConfirm}
             disabled={isLoading}
           >

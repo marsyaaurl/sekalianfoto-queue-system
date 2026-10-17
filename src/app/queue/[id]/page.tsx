@@ -131,7 +131,7 @@ export default function QueueStatusPage({ params }: QueueStatusPageProps) {
 
   return (
     <div className="flex flex-1 flex-col gap-6">
-      <div>
+      <div className="flex justify-center">
         <BranchLocationBadge
           boothName={queue.booth.name}
           branch={queue.booth.branch}
@@ -149,7 +149,9 @@ export default function QueueStatusPage({ params }: QueueStatusPageProps) {
         <NotificationBanner onEnable={requestPermission} />
       )}
 
-      <p className="text-foreground/70">{AUTO_REFRESH_NOTE}</p>
+      <p className="leading-relaxed text-muted-foreground">
+        {AUTO_REFRESH_NOTE}
+      </p>
 
       {queue.queueStatus === "WAITING" && (
         <div className="mt-auto flex flex-col gap-3">
@@ -161,7 +163,7 @@ export default function QueueStatusPage({ params }: QueueStatusPageProps) {
           <Button
             type="button"
             variant="outline"
-            className="h-12 w-full border-error text-base font-bold text-error"
+            className="h-12 w-full rounded-xl border-destructive/50 bg-card text-base font-bold text-destructive hover:bg-destructive/10 hover:text-destructive"
             onClick={() => setIsCancelOpen(true)}
           >
             Batalkan Antrean
