@@ -2,7 +2,8 @@
 
 import Image from "next/image"
 import Link from "next/link"
-import { usePathname } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
+import { useState } from "react"
 
 import { cn } from "@/lib/utils"
 
@@ -18,6 +19,9 @@ const NAV_ITEMS: readonly NavItem[] = [
 
 const LOGO_WIDTH = 150
 const LOGO_HEIGHT = 45
+
+const LOGOUT_ENDPOINT = "/api/auth/logout"
+const LOGIN_PATH = "/auth/login"
 
 interface SidebarNavLinkProps {
   item: NavItem
@@ -38,6 +42,35 @@ function SidebarNavLink({ item, isActive }: SidebarNavLinkProps) {
     >
       {item.label}
     </Link>
+  )
+}
+
+function SidebarLogoutButton() {
+  const router = useRouter()
+  const [isLoggingOut, setIsLoggingOut] = useState(false)
+
+  const handleLogout = async () => {
+    setIsLoggingOut(true)
+    const response = await fetch(LOGOUT_ENDPOINT, { method: "POST" }).catch(
+      () => null
+    )
+    setIsLoggingOut(false)
+
+    // Stay on the page when logout fails, so the user can try again.
+    if (!response?.ok) return
+    router.push(LOGIN_PATH)
+    router.refresh()
+  }
+
+  return (
+    <button
+      type="button"
+      disabled={isLoggingOut}
+      onClick={handleLogout}
+      className="rounded-lg px-4 py-3 text-left text-lg font-medium text-sidebar-foreground/70 transition-colors hover:text-sidebar-foreground disabled:opacity-50"
+    >
+      Logout
+    </button>
   )
 }
 
@@ -62,6 +95,7 @@ export function Sidebar() {
             isActive={pathname.startsWith(item.href)}
           />
         ))}
+        <SidebarLogoutButton />
       </nav>
     </aside>
   )

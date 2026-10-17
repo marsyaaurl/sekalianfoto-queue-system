@@ -15,7 +15,7 @@ export interface BoothFilterProps {
   onSelect: (id: string) => void
 }
 
-const PILL_CLASS = "h-11 shrink-0 gap-2 rounded-full px-5 text-base"
+const PILL_CLASS = "h-12 shrink-0 gap-2 rounded-full px-6 text-lg"
 
 interface BoothPillProps {
   booth: BoothFilterOption

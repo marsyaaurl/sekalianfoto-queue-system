@@ -222,6 +222,7 @@ export function useBooths() {
     loadError,
     pendingBoothId,
     isCreating,
+    refetch,
     retry,
     createBooth,
     updateBooth,
