@@ -19,6 +19,7 @@ import {
   type QueueStatusValue,
 } from "@/lib/queue-api"
 import { useNotificationPermission } from "@/lib/use-notification-permission"
+import { useProgressNotification } from "@/lib/use-progress-notification"
 import { useTurnNotification } from "@/lib/use-turn-notification"
 
 const POLL_INTERVAL_MS = 5000
@@ -94,6 +95,7 @@ export default function QueueStatusPage({ params }: QueueStatusPageProps) {
   const [cancelError, setCancelError] = useState("")
 
   useTurnNotification(queue?.queueStatus, queue?.booth.name, permission)
+  useProgressNotification(queue?.peopleAhead, queue?.queueStatus)
 
   const handleConfirmCancel = async () => {
     setIsCancelling(true)

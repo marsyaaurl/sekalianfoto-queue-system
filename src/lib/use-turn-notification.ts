@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react"
 
+import { showBrowserNotification } from "@/lib/browser-notification"
 import type { QueueStatusValue } from "@/lib/queue-api"
 import type { NotificationPermissionState } from "@/lib/use-notification-permission"
 
@@ -22,12 +23,9 @@ export function useTurnNotification(
 
     if (!justBecameYourTurn || permission !== "granted") return
 
-    try {
-      new Notification(NOTIFICATION_TITLE, {
-        body: `Giliranmu sudah tiba. Silakan masuk ke ${boothName}.`,
-      })
-    } catch {
-      // Some mobile browsers only allow notifications through a service worker.
-    }
+    showBrowserNotification(
+      NOTIFICATION_TITLE,
+      `Giliranmu sudah tiba. Silakan masuk ke ${boothName}.`,
+    )
   }, [status, boothName, permission])
 }
