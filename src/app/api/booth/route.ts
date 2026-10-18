@@ -9,6 +9,13 @@ const createBoothSchema = z.object({
     branch: z.string().trim().min(5, "Branch name must be at least 5 characters."),
 });
 
+const PUBLIC_APP_URL = "https://sekalianfoto-queue-system.vercel.app";
+
+function buildQrFilePath(boothId: string): string {
+    const targetUrl = `${PUBLIC_APP_URL}/queue?idBooth=${encodeURIComponent(boothId)}`;
+    return `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(targetUrl)}`;
+}
+
 export async function POST(req: NextRequest) {
     try {
         // 1. RBAC Check (Admin session required)
@@ -52,10 +59,8 @@ export async function POST(req: NextRequest) {
             },
         });
 
-        // 4. Generate GoQR URL pointing to the queue form for this booth.
-        const origin = req.nextUrl.origin; // e.g. "http://localhost:3000"
-        const targetUrl = `${origin}/queue?idBooth=${encodeURIComponent(booth.id)}`;
-        const qrFilePath = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(targetUrl)}`;
+        // 4. Generate a QR URL pointing to the production queue form for this booth.
+        const qrFilePath = buildQrFilePath(booth.id);
 
         // 5. Save the generated QR URL into the booth record
         const updatedBooth = await prisma.booth.update({
@@ -111,7 +116,6 @@ export async function GET() {
                     id: true,
                     name: true,
                     branch: true,
-                    qrFilePath: true,
                     createdAt: true,
                 },
                 orderBy: {
@@ -141,6 +145,7 @@ export async function GET() {
         )
         const boothsWithCounts = booths.map((booth) => ({
             ...booth,
+            qrFilePath: buildQrFilePath(booth.id),
             activeQueueCount: queueCountByBooth.get(booth.id) ?? 0,
         }))
 
