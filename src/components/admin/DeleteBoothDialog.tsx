@@ -22,7 +22,7 @@ export interface DeleteBoothDialogProps {
 }
 
 const DELETE_WARNING =
-  "Booth dan QR code-nya akan dihapus. Pelanggan tidak bisa lagi scan QR ini."
+  "Booth, QR code, dan seluruh data antreannya akan dihapus permanen. Pelanggan tidak bisa lagi scan QR ini."
 const CONFIRM_BUTTON_CLASS =
   "bg-destructive text-primary-foreground hover:bg-destructive/90"
 

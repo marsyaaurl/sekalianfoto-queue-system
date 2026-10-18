@@ -165,10 +165,13 @@ export async function DELETE(
             )
         }
 
-        await prisma.booth.delete({
-            where: {
-                id: id,
-            }
+        await prisma.$transaction(async (transaction) => {
+            await transaction.queue.deleteMany({
+                where: { idBooth: id },
+            })
+            await transaction.booth.delete({
+                where: { id },
+            })
         })
 
         return NextResponse.json(
@@ -176,7 +179,7 @@ export async function DELETE(
             { status: 200 }
         )
     } catch (err) {
-        console.error("Unexpected error on deleting booth.")
+        console.error("Unexpected error on deleting booth:", err);
 
         return NextResponse.json(
             { message: "Internal server error." },
