@@ -40,7 +40,7 @@ const COLUMN_HEADERS = [
 const QUEUE_COUNT_UNIT = "orang"
 const EMPTY_QUEUE_LABEL = "Kosong"
 
-const ROW_BUTTON_CLASS = "h-9 px-3.5 text-sm"
+const ROW_BUTTON_CLASS = "h-8 px-3 text-xs"
 const ICON_BUTTON_CLASS = "rounded-lg"
 const DELETE_BUTTON_CLASS =
   "text-destructive border-destructive/50 hover:bg-destructive/10 hover:text-destructive"
@@ -148,7 +148,7 @@ export function BoothTable({
 }: BoothTableProps) {
   return (
     <div className="overflow-hidden rounded-xl border">
-      <Table className="text-base">
+      <Table className="text-sm">
         <TableHeader className="bg-muted">
           <TableRow>
             {COLUMN_HEADERS.map((header) => (

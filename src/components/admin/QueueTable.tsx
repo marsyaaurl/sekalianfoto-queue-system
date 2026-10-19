@@ -43,8 +43,8 @@ export interface RowActionAvailability {
 
 const EXTEND_SESSION_MINUTES = 5
 const EMPTY_PHONE_PLACEHOLDER = "-"
-const STATUS_BADGE_CLASS = "h-7 px-3 text-sm"
-const ROW_BUTTON_CLASS = "h-9 px-3.5 text-sm"
+const STATUS_BADGE_CLASS = "h-6 px-2.5 text-xs"
+const ROW_BUTTON_CLASS = "h-8 px-3 text-xs"
 const COLUMN_HEADERS = ["No.", "Nama", "No. telepon", "Status", "Aksi"] as const
 
 // Only one entry can be active at a time; these statuses mean "inside the booth".
@@ -205,7 +205,7 @@ export function QueueTable({
 }: QueueTableProps) {
   return (
     <div className="overflow-hidden rounded-xl border">
-      <Table className="text-base">
+      <Table className="text-sm">
         <TableHeader className="bg-muted">
           <TableRow>
             {COLUMN_HEADERS.map((header) => (

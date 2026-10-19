@@ -186,7 +186,7 @@ function QueueMonitoringSection() {
 
   return (
     <div className="flex flex-col gap-6">
-      <h1 className="text-3xl font-bold">Antrean</h1>
+      <h1 className="text-2xl font-bold">Antrean</h1>
 
       {boothStatus === "ready" && booths.length > 0 && (
         <BoothFilter
